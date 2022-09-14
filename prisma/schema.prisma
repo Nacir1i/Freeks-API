@@ -1,0 +1,92 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["referentialIntegrity"]
+}
+
+datasource db {
+  provider             = "mysql"
+  url                  = env("DATABASE_URL")
+  referentialIntegrity = "prisma"
+}
+
+model user {
+  id           String         @id
+  username     String
+  password     String
+  email        String
+  role         ROLE           @default(USER)
+  createAt     DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  participants participants[]
+
+  @@unique([username, email])
+}
+
+model event {
+  id           String         @id
+  name         String?
+  game         GAMES          @default(FIFA)
+  full         Boolean        @default(false)
+  details      details[]
+  participants participants[]
+  matches      matches[]
+}
+
+model details {
+  id         String   @id @default(cuid())
+  eventId    String
+  maxplayers Int
+  startsIn   DateTime
+  endsIn     DateTime
+  ended      Boolean  @default(false)
+  createAt   DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  evnt       event?   @relation(fields: [eventId], references: [id])
+}
+
+model participants {
+  id         String      @id @default(cuid())
+  eventId    String
+  userId     String
+  group      GROUP       @default(A)
+  eliminated Boolean     @default(false)
+  joinedIn   DateTime    @default(now())
+  event      event       @relation(fields: [eventId], references: [id])
+  user       user        @relation(fields: [userId], references: [id])
+  partMatch  partMatch[]
+}
+
+model matches {
+  id        String      @id @default(cuid())
+  eventId   String
+  startedAt DateTime
+  endedAt   DateTime
+  event     event       @relation(fields: [eventId], references: [id])
+  partMatch partMatch[]
+}
+
+model partMatch {
+  id            String       @id @default(cuid())
+  participantId String
+  matchesId     String
+  participants  participants @relation(fields: [participantId], references: [id])
+  matches       matches      @relation(fields: [matchesId], references: [id])
+}
+
+enum ROLE {
+  USER
+  ADMIN
+}
+
+enum GROUP {
+  A
+  B
+}
+
+enum GAMES {
+  FORTNITE
+  FIFA
+  LEAGUE
+  PUBG
+  FREEFIRE
+}
