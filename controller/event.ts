@@ -1,9 +1,9 @@
 import { GROUP, participants } from "@prisma/client";
 import { Request, Response } from "express";
 import { prisma, crypto } from "../server";
-import { initiateRound } from "../utilityFunctions/initiateRound";
+import { initiateRound } from "../utils/initiateRound";
 
-module.exports = {
+export const controller = {
   getAllEvents: async (req: Request, res: Response) => {
     try {
       const events = await prisma.event.findMany({
@@ -13,7 +13,7 @@ module.exports = {
       });
       res.status(200).send({ message: "events required !", events });
     } catch (err) {
-      console.log(err);
+      console.log("getAllEvents : ", err);
       res.status(401).send({ message: "internal error" });
     }
   },
@@ -55,7 +55,7 @@ module.exports = {
           },
         },
       });
-      prisma.$disconnect();
+
       const result = await event.map((event) => {
         return {
           ...event,
@@ -66,7 +66,7 @@ module.exports = {
       });
       res.status(200).send({ message: "event found", result });
     } catch (err) {
-      console.log(err);
+      console.log("getEvent : ", err);
       res.status(401).send({ message: "internal error" });
     }
   },
@@ -77,7 +77,6 @@ module.exports = {
           eventId: req.body.partId,
         },
       });
-    prisma.$disconnect();
 
     res.status(200).send(participants);
   },
@@ -96,11 +95,11 @@ module.exports = {
           },
         },
       });
-      prisma.$disconnect();
+
       res.status(200).send({ message: "event created", event });
       console.log(`event : "${req.body.eventName}" has been created`);
     } catch (err) {
-      console.log(err);
+      console.log("event create : ", err);
       res.status(401).send({ message: "internal error" });
     }
   },
@@ -114,7 +113,7 @@ module.exports = {
         participants: true,
       },
     });
-    prisma.$disconnect();
+
     if (!event) {
       res.status(404).send({ message: "not found" });
       return;
@@ -122,20 +121,21 @@ module.exports = {
       res.status(403).send({ message: "event is full" });
       return;
     } else {
-      const test: participants | null = await prisma.participants.findFirst({
-        where: {
-          AND: [
-            {
-              userId: req.body.userId,
-            },
-            {
-              eventId: req.body.eventId,
-            },
-          ],
-        },
-      });
-      prisma.$disconnect();
-      if (test) {
+      const participant: participants | null =
+        await prisma.participants.findFirst({
+          where: {
+            AND: [
+              {
+                userId: req.body.userId,
+              },
+              {
+                eventId: req.body.eventId,
+              },
+            ],
+          },
+        });
+
+      if (participant) {
         res.status(403).send({ message: "user already joined !" });
         return;
       }
@@ -153,48 +153,32 @@ module.exports = {
             group: maxplayers / 2 > groupACount ? GROUP.A : GROUP.B,
           },
         });
-        prisma.$disconnect();
 
         res.status(200).send({ message: "user joined", participant });
         console.log(
           `user : "${req.body.userId}" joined event : "${req.body.eventId}"`
         );
       } catch (err) {
-        console.log(err);
+        console.log("join : ", err);
         res.status(401).send({ message: "internal error" });
       }
     }
   },
   eliminate: async (req: Request, res: Response) => {
-    const part: participants | null = await prisma.participants.findFirst({
-      where: {
-        AND: [
-          {
-            userId: req.body.userId,
-          },
-          {
-            eventId: req.body.eventId,
-          },
-        ],
-      },
-    });
-    if (!part) {
-      res.status(404).send({ message: "user not found !" });
-      return;
-    }
-
+    const participant = req.body.participant;
     try {
-      const test = await prisma.participants.update({
+      const eliminated = await prisma.participants.update({
         where: {
-          id: part.id,
+          id: participant.id,
         },
         data: {
           eliminated: true,
         },
       });
 
-      res.status(200).send({ message: "user eliminated" });
-    } catch (error) {
+      res.status(200).send(eliminated);
+    } catch (err) {
+      console.log("eliminate : ", err);
       res.status(401).send({ message: "internal error !" });
     }
   },
@@ -212,7 +196,7 @@ module.exports = {
         },
       },
     });
-    prisma.$disconnect();
+
     if (!event) {
       res.status(404).send({ message: "not found" });
       return;
@@ -230,8 +214,8 @@ module.exports = {
         await initiateRound([groupA[0], groupB[0]]);
         res.status(200).send({ message: "final round initiated !" });
       } catch (err) {
+        console.log("initiate last match : ", err);
         res.status(401).send({ message: "internal error !" });
-        console.log(err);
       }
       return;
     }
@@ -241,40 +225,23 @@ module.exports = {
       })
       .catch((err) => {
         res.status(401).send({ message: "internal error !" });
-        console.log(err);
+        console.log("initiate round : ", err);
       });
   },
   deletePart: async (req: Request, res: Response) => {
-    const test: participants | null = await prisma.participants.findFirst({
-      where: {
-        AND: [
-          {
-            userId: req.body.userId,
-          },
-          {
-            eventId: req.body.eventId,
-          },
-        ],
-      },
-    });
-    if (!test) {
-      res.status(404).send({ message: "user not found !" });
-      return;
-    }
-    prisma.$disconnect();
+    const participant = req.body.participant;
 
     try {
-      await prisma.participants.delete({
+      const update = await prisma.participants.delete({
         where: {
-          id: test.id,
+          id: participant.id,
         },
       });
-      prisma.$disconnect();
 
-      res.status(200).send({ message: "participant deleted !" });
-    } catch (error) {
-      console.log(error);
-      res.status(401).send({ message: "internal error !" });
+      res.status(200).send(update);
+    } catch (err) {
+      console.log("deletePart : ", err);
+      res.status(500).send({ message: "internal error !" });
     }
   },
 };

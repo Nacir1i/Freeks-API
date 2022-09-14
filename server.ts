@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { eventClose } from "./Middlewares/eventPost";
+import { eventClose } from "./middlewares/eventPost";
 
 export const express = require("express");
 export const bcrypt = require("bcrypt");

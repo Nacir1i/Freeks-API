@@ -1,14 +1,17 @@
 import { express } from "../server";
-const eventRouter = express.Router();
-const eventController = require("../controller/eventController");
+import { controller } from "../controller/event";
+import { authAdmin } from "../middlewares/authAdmin";
+import { authUser } from "../middlewares/authUser";
 
-eventRouter.get("/getAllEvents", eventController.getAllEvents);
-eventRouter.post("/getEvent", eventController.getEvent);
-eventRouter.post("/getParticipants", eventController.getParticipants);
-eventRouter.post("/create", eventController.create);
-eventRouter.post("/join", eventController.join);
-eventRouter.post("/delete", eventController.deletePart);
-eventRouter.post("/eliminate", eventController.eliminate);
-eventRouter.post("/initiate", eventController.initiate);
+const eventRouter = express.Router();
+
+eventRouter.get("/getAllEvents", controller.getAllEvents);
+eventRouter.post("/getEvent", controller.getEvent);
+eventRouter.post("/getParticipants", controller.getParticipants);
+eventRouter.post("/create", authAdmin, controller.create);
+eventRouter.post("/join", authUser, controller.join);
+eventRouter.post("/delete", authAdmin, controller.deletePart);
+eventRouter.post("/eliminate", authAdmin, controller.eliminate);
+eventRouter.post("/initiate", authAdmin, controller.initiate);
 
 module.exports = eventRouter;

@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import { user } from "@prisma/client";
 import { jwt } from "../server";
 
 export const authUser = async (
@@ -6,21 +7,19 @@ export const authUser = async (
   res: Response,
   next: NextFunction
 ) => {
-  const token = req.cookies.token;
-  if (token !== "") {
-    await jwt.verify(token, process.env.TOKEN, (err: string) => {
-      if (err) {
-        res.status(401).send({
-          message: "token is invalid",
-        });
-      } else {
-        next();
+  const authToken: string = req.cookies.authToken;
+  if (authToken !== "") {
+    const user: user = await jwt.verify(
+      authToken,
+      process.env.TOKEN,
+      (err: string) => {
+        if (err) {
+          req.body.user = user;
+          return res.status(401).send();
+        }
+        return next();
       }
-    });
-    return;
+    );
   }
-  res.status(400).send({
-    message: "no access token was found",
-  });
-  return;
+  return res.status(400).send();
 };

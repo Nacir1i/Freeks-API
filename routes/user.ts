@@ -1,10 +1,11 @@
 import { express } from "../server";
-import { VerifyUserIdent } from "../Middlewares/verifyUseIdent";
+import { VerifyUserIdent } from "../middlewares/verifyUseIdent";
+import { controller } from "../controller/user";
 const userRouter = express.Router();
-const controller = require("../controller/userController");
 
+userRouter.get("/test", controller.test);
 userRouter.post("/get", controller.get);
 userRouter.post("/create", VerifyUserIdent, controller.create);
-userRouter.post("/login", controller.login);
+userRouter.post("/login", VerifyUserIdent, controller.login);
 
-(module.exports = userRouter), express;
+module.exports = userRouter;
