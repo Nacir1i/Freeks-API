@@ -10,7 +10,7 @@ export const controller = {
     try {
       const user: user | null = await prisma.user.findFirst({
         where: {
-          username: req.body.username,
+          email: req.body.email,
         },
       });
 
@@ -50,7 +50,7 @@ export const controller = {
         data: user,
       });
 
-      res.status(200).send({ token });
+      res.status(200).send(token);
     } catch (err) {
       console.log("create : ", err);
       res.status(500).send();
@@ -70,6 +70,7 @@ export const controller = {
     try {
       if (await bcrypt.compare(req.body.password, user.password)) {
         const token = jwt.sign(user, process.env.TOKEN);
+        res.cookie("authToken", token);
         res.status(200).send({ token });
       } else {
         res.status(401).send();

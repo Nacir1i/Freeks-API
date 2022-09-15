@@ -96,11 +96,11 @@ export const controller = {
         },
       });
 
-      res.status(200).send({ message: "event created", event });
-      console.log(`event : "${req.body.eventName}" has been created`);
+      console.log(`event : "${event.id}" has been created`);
+      res.status(200).send(event);
     } catch (err) {
       console.log("event create : ", err);
-      res.status(401).send({ message: "internal error" });
+      res.status(500).send();
     }
   },
   join: async (req: Request, res: Response) => {
@@ -165,11 +165,11 @@ export const controller = {
     }
   },
   eliminate: async (req: Request, res: Response) => {
-    const participant = req.body.participant;
+    const participant: participants | null = req.body.participant;
     try {
       const eliminated = await prisma.participants.update({
         where: {
-          id: participant.id,
+          id: participant?.id,
         },
         data: {
           eliminated: true,
@@ -229,12 +229,11 @@ export const controller = {
       });
   },
   deletePart: async (req: Request, res: Response) => {
-    const participant = req.body.participant;
-
+    const participant: participants | null = req.body.participant;
     try {
       const update = await prisma.participants.delete({
         where: {
-          id: participant.id,
+          id: participant?.id,
         },
       });
 

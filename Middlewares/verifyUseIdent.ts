@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from "express";
-import { prisma } from "../server";
 
 export const VerifyUserIdent = async (
   req: Request,
@@ -8,8 +7,8 @@ export const VerifyUserIdent = async (
 ) => {
   if (
     Object.keys(req.body).length === 0 ||
-    req.body.password === "" ||
-    req.body.email === ""
+    req.body.password === undefined ||
+    req.body.email === undefined
   ) {
     res.status(401).send();
     return;
