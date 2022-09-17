@@ -11,6 +11,7 @@ const cors = require("cors");
 const userRouter = require("./routes/user");
 const eventRouter = require("./routes/event");
 const app = express();
+const PORT = process.env.PORT || 3001;
 
 prisma.$use(eventClose);
 app.use(express.json());
@@ -19,7 +20,7 @@ app.use(cors());
 app.use("/api/user", userRouter);
 app.use("/api/event", eventRouter);
 
-app.listen(3001, (err: any) => {
+app.listen(PORT, (err: any) => {
   if (err) {
     console.log(err);
   }
