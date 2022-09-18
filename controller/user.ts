@@ -8,9 +8,19 @@ export const controller = {
   },
   get: async (req: Request, res: Response) => {
     try {
-      const user: user | null = await prisma.user.findFirst({
+      if (req.body.email == undefined) {
+        res.status(404).send();
+        return;
+      }
+      const user = await prisma.user.findFirst({
         where: {
           email: req.body.email,
+        },
+        select: {
+          id: true,
+          username: true,
+          email: true,
+          createAt: true,
         },
       });
 
