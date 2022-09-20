@@ -1,8 +1,8 @@
 import { express } from "../server";
 import { controller } from "../controller/event";
-import { authAdmin } from "../Middlewares/authAdmin";
-import { authUser } from "../Middlewares/authUser";
-import { checkPart } from "../Middlewares/checkPart";
+import { authAdmin } from "../middlewares/authAdmin";
+import { authUser } from "../middlewares/authUser";
+import { checkPart } from "../middlewares/checkPart";
 
 const eventRouter = express.Router();
 
