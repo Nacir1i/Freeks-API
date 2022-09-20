@@ -1,5 +1,5 @@
 import { express } from "../server";
-import { VerifyUserIdent } from "../Middlewares/verifyUserIdent";
+import { VerifyUserIdent } from "../middlewares/verifyUserIdent";
 import { controller } from "../controller/user";
 const userRouter = express.Router();
 
