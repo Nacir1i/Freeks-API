@@ -10,7 +10,7 @@ export const VerifyUserIdent = async (
     req.body.password === undefined ||
     req.body.email === undefined
   ) {
-    res.status(401).send();
+    res.status(401).send({ message: "please provide valid data" });
     return;
   }
 

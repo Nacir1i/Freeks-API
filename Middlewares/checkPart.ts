@@ -22,7 +22,7 @@ export const checkPart = async (
   prisma.$disconnect();
 
   if (!participant) {
-    res.status(404);
+    res.status(404).send({ messgae: "Participant Not Found" });
     return;
   } else {
     req.body.participant = participant;

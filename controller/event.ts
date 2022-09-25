@@ -11,10 +11,10 @@ export const controller = {
           details: true,
         },
       });
-      res.status(200).send({ message: "events required !", events });
+      res.status(200).send({ events });
     } catch (err) {
       console.log("getAllEvents : ", err);
-      res.status(401).send({ message: "internal error" });
+      res.status(401).send({ message: "Internal server error" });
     }
   },
   getEvent: async (req: Request, res: Response) => {
@@ -56,7 +56,7 @@ export const controller = {
         },
       });
 
-      const result = await event.map((event) => {
+      const result = event.map((event) => {
         return {
           ...event,
           matches: event.matches.map((partMatch) =>
@@ -64,10 +64,10 @@ export const controller = {
           ),
         };
       });
-      res.status(200).send({ message: "event found", result });
+      res.status(200).send({ result });
     } catch (err) {
       console.log("getEvent : ", err);
-      res.status(401).send({ message: "internal error" });
+      res.status(401).send({ message: "Internal server error" });
     }
   },
   getParticipants: async (req: Request, res: Response) => {
@@ -100,7 +100,7 @@ export const controller = {
       res.status(200).send(event);
     } catch (err) {
       console.log("event create : ", err);
-      res.status(500).send();
+      res.status(500).send({ message: "Internal server error" });
     }
   },
   join: async (req: Request, res: Response) => {
@@ -115,10 +115,10 @@ export const controller = {
     });
 
     if (!event) {
-      res.status(404).send({ message: "not found" });
+      res.status(404).send({ message: "Event not found" });
       return;
     } else if (event.full) {
-      res.status(403).send({ message: "event is full" });
+      res.status(403).send({ message: "Event is full" });
       return;
     } else {
       const participant: participants | null =
@@ -136,7 +136,7 @@ export const controller = {
         });
 
       if (participant) {
-        res.status(403).send({ message: "user already joined !" });
+        res.status(403).send({ message: "User already joined" });
         return;
       }
       try {
@@ -154,13 +154,13 @@ export const controller = {
           },
         });
 
-        res.status(200).send({ message: "user joined", participant });
+        res.status(200).send({ participant });
         console.log(
           `user : "${req.body.userId}" joined event : "${req.body.eventId}"`
         );
       } catch (err) {
         console.log("join : ", err);
-        res.status(401).send({ message: "internal error" });
+        res.status(401).send({ message: "Internal server error" });
       }
     }
   },
@@ -179,7 +179,7 @@ export const controller = {
       res.status(200).send(eliminated);
     } catch (err) {
       console.log("eliminate : ", err);
-      res.status(401).send({ message: "internal error !" });
+      res.status(401).send({ message: "Internal server error !" });
     }
   },
   initiate: async (req: Request, res: Response) => {
@@ -198,7 +198,7 @@ export const controller = {
     });
 
     if (!event) {
-      res.status(404).send({ message: "not found" });
+      res.status(404).send({ message: "Event not found" });
       return;
     }
 
@@ -212,19 +212,19 @@ export const controller = {
     if (groupA.length === 1 && groupB.length === 1) {
       try {
         await initiateRound([groupA[0], groupB[0]]);
-        res.status(200).send({ message: "final round initiated !" });
+        res.status(200).send({ message: "Final round initiated !" });
       } catch (err) {
         console.log("initiate last match : ", err);
-        res.status(401).send({ message: "internal error !" });
+        res.status(401).send({ message: "Internal server error !" });
       }
       return;
     }
     await Promise.all([initiateRound(groupA), initiateRound(groupB)])
       .then(() => {
-        res.status(200).send({ message: "round initiated !" });
+        res.status(200).send({ message: "Round initiated !" });
       })
       .catch((err) => {
-        res.status(401).send({ message: "internal error !" });
+        res.status(401).send({ message: "Internal server error !" });
         console.log("initiate round : ", err);
       });
   },
@@ -240,7 +240,7 @@ export const controller = {
       res.status(200).send(update);
     } catch (err) {
       console.log("deletePart : ", err);
-      res.status(500).send({ message: "internal error !" });
+      res.status(500).send({ message: "Internal server error !" });
     }
   },
 };

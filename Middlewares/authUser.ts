@@ -7,14 +7,12 @@ export const authUser = async (
   res: Response,
   next: NextFunction
 ) => {
-  console.log("authUser");
-
   const authToken: string = req.cookies.authToken;
   if (authToken !== "") {
     try {
       await jwt.verify(authToken, process.env.TOKEN, (err: any, user: user) => {
         if (err) {
-          res.status(401).send();
+          res.status(401).send({ message: "Access token no valid" });
         } else {
           req.body.user = user;
           next();
@@ -22,10 +20,10 @@ export const authUser = async (
       });
     } catch (err) {
       console.log(err);
-      res.status(500).send();
+      res.status(500).send({ message: "Internal server error" });
     }
 
     return;
   }
-  return res.status(400).send();
+  return res.status(400).send({ message: "No access token was found" });
 };

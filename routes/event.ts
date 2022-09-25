@@ -27,4 +27,4 @@ eventRouter.post(
   controller.eliminate
 );
 
-module.exports = eventRouter;
+export default eventRouter;

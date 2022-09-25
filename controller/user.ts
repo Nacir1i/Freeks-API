@@ -9,7 +9,7 @@ export const controller = {
   get: async (req: Request, res: Response) => {
     try {
       if (req.body.email == undefined) {
-        res.status(404).send();
+        res.status(401).send({ massage: "Please provide valid data" });
         return;
       }
       const user = await prisma.user.findFirst({
@@ -25,13 +25,13 @@ export const controller = {
       });
 
       if (!user) {
-        res.status(404).send();
+        res.status(404).send({ message: "Account Not Found" });
         return;
       }
       res.status(200).send(user);
     } catch (err) {
       console.log("create : ", err);
-      res.status(500).send();
+      res.status(500).send({ message: "Internal Server Error" });
     }
   },
   create: async (req: Request, res: Response) => {
@@ -42,28 +42,28 @@ export const controller = {
     });
 
     if (testUser !== 0) {
-      res.status(409).send();
+      res.status(409).send({ message: "Username/Email already taken" });
       return;
     }
     try {
       const salt: string = await bcrypt.genSalt();
       const hashedPassword: string = await bcrypt.hash(req.body.password, salt);
-      const user = {
+      const data = {
         id: crypto.randomBytes(10).toString("hex"),
         username: req.body.username,
         password: hashedPassword,
         email: req.body.email,
       };
-      const token: string = await jwt.sign(user, process.env.TOKEN);
+      const token: string = await jwt.sign(data, process.env.TOKEN);
 
-      await prisma.user.create({
-        data: user,
+      const user: user = await prisma.user.create({
+        data: data,
       });
 
-      res.status(200).send(token);
+      res.status(200).send({ user, token });
     } catch (err) {
       console.log("create : ", err);
-      res.status(500).send();
+      res.status(500).send({ message: "Internal Server Error" });
     }
   },
   login: async (req: Request, res: Response) => {
@@ -74,20 +74,44 @@ export const controller = {
     });
 
     if (!user) {
-      res.status(404).send();
+      res.status(404).send({ message: "Account Not Found" });
       return;
     }
     try {
       if (await bcrypt.compare(req.body.password, user.password)) {
         const token = jwt.sign(user, process.env.TOKEN);
         res.cookie("authToken", token);
-        res.status(200).send({ token });
+        res.status(200).send({ user, token });
       } else {
-        res.status(401).send();
+        res.status(401).send({ message: "Wrong Password" });
       }
     } catch (err) {
       console.log("login : ", err);
-      res.status(500).send();
+      res.status(500).send({ message: "Internal server error" });
     }
+  },
+  verifyToken: async (req: Request, res: Response) => {
+    const authToken: string = req.cookies.authToken;
+    if (authToken !== "") {
+      try {
+        await jwt.verify(
+          authToken,
+          process.env.TOKEN,
+          (err: any, user: user) => {
+            if (err) {
+              res.status(200).send(null);
+            } else {
+              res.status(200).send(user);
+            }
+          }
+        );
+      } catch (err) {
+        console.log(err);
+        res.status(500).send(null);
+      }
+
+      return;
+    }
+    return res.status(200).send(null);
   },
 };

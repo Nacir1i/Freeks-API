@@ -1,10 +1,11 @@
 {
-  "name": "mongodb",
+  "name": "freeksbackend",
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "startDev": "nodemon server.ts",
-    "start" : "npx ts-node server.ts"
+    "dev": "nodemon server.ts",
+    "start" : "npx ts-node server.ts",
+    "build" : "npx tsc"
   },
   "keywords": [],
   "author": "",
@@ -14,10 +15,10 @@
     "@types/node": "^18.7.11",
     "prisma": "^4.2.1",
     "ts-node": "^10.9.1",
-    "typescript": "^4.7.4"
+    "typescript": "^4.7.4",
+    "nodemon": "^2.0.20"
   },
   "dependencies": {
-    "nodemon": "^2.0.20",
     "@prisma/client": "^4.2.1",
     "bcrypt": "^5.0.1",
     "cookie-parser": "^1.4.6",
