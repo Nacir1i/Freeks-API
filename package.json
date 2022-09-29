@@ -4,7 +4,7 @@
   "description": "",
   "scripts": {
     "dev": "nodemon server.ts",
-    "start" : "npx ts-node server.ts",
+    "start" : "node dist/server.js",
     "build" : "npx tsc"
   },
   "keywords": [],
