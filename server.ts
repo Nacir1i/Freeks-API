@@ -6,21 +6,24 @@ export const jwt = require("jsonwebtoken");
 export const cookieParser = require("cookie-parser");
 export const crypto = require("crypto");
 export const prisma = new PrismaClient();
-const cors = require("cors");
+import cors from "cors";
 import userRouter from "./routes/user";
 import eventRouter from "./routes/event";
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+const whiteList = ["https://freeks.onrender.com", "http://localhost:3000"];
+const options: cors.CorsOptions = {
+  origin: whiteList,
+  credentials: true,
+  optionsSuccessStatus: 200,
+  methods: "GET,POST",
+};
+
 prisma.$use(eventClose);
 app.use(express.json());
 app.use(cookieParser());
-app.use(
-  cors({
-    origin: "http://localhost:3000",
-    credentials: true,
-  })
-);
+app.use(cors(options));
 app.use("/api/user", userRouter);
 app.use("/api/event", eventRouter);
 

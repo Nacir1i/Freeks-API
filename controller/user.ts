@@ -90,7 +90,7 @@ export const controller = {
       res.status(500).send({ message: "Internal server error" });
     }
   },
-  verifyToken: async (req: Request, res: Response) => {
+  verifyCookieToken: async (req: Request, res: Response) => {
     const authToken: string = req.cookies.authToken;
     if (authToken !== "") {
       try {
@@ -105,6 +105,27 @@ export const controller = {
             }
           }
         );
+      } catch (err) {
+        console.log(err);
+        res.status(500).send(null);
+      }
+
+      return;
+    }
+    return res.status(200).send(null);
+  },
+  verifyHeaderToken: async (req: Request, res: Response) => {
+    const authToken: string | undefined = req.headers.authorization;
+    const token: string | undefined = authToken && authToken.split(" ")[1];
+    if (token) {
+      try {
+        await jwt.verify(token, process.env.TOKEN, (err: any, user: user) => {
+          if (err) {
+            res.status(200).send(null);
+          } else {
+            res.status(200).send(user);
+          }
+        });
       } catch (err) {
         console.log(err);
         res.status(500).send(null);
